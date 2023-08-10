@@ -1,0 +1,65 @@
+version: '3.7'
+
+services:
+  server:
+    image: nginx:alpine
+    volumes:
+      - ./public:/var/www/app/public:rw,delegated
+      - ./storage:/var/www/app/storage:rw,delegated
+      - ./docker/local/nginx/conf.d/:/etc/nginx/conf.d/
+    ports:
+      - "0.0.0.0:8085:80"
+    networks:
+      - drive-network
+    container_name: drive-webserver
+    depends_on:
+      - app
+  app:
+    image: drive_app:v0.1
+    container_name: drive-app
+    build:
+      context: .
+      dockerfile: ./docker/local/php/Dockerfile
+    working_dir: /var/www/app
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./public:/var/www/app/public:rw,delegated
+      - ./storage:/var/www/app/storage:rw,delegated
+      - ./vendor:/var/www/app/vendor:rw,delegated
+      - ./app:/var/www/app/app
+      - ./config:/var/www/app/config
+      - ./database:/var/www/app/database
+      - ./resources:/var/www/app/resources
+      - ./routes:/var/www/app/routes
+      - ./lang:/var/www/app/lang
+      - ./composer.json:/var/www/app/composer.json
+      - ./composer.lock:/var/www/app/composer.lock
+    networks:
+      - drive-network
+    depends_on:
+      - db
+  db:
+    image: 'mysql:8.0'
+    container_name: drive_db
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    ports: 
+      - "3313:3306"
+    volumes:
+      - ./docker/local/volumes/mysql:/var/lib/mysql
+    networks:
+      - drive-network
+networks:
+  drive-network:
+    driver: bridge
+

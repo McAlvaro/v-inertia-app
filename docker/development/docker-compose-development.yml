@@ -1,0 +1,65 @@
+version: '3.7'
+
+services:
+  server:
+    image: staticfloat/nginx-certbot
+    restart: unless-stopped
+    volumes:
+      - ./public:/var/www/app/public:rw,delegated
+      - ./storage:/var/www/app/storage:rw,delegated
+      - ./docker/development/nginx/conf.d:/etc/nginx/user.conf.d:ro
+      - letsencrypt:/etc/letsencrypt
+    ports:
+      - 80:80/tcp
+      - 443:443/tcp
+    environment:
+      CERTBOT_EMAIL: mc@yopmail.com
+      ENVSUBST_VARS: FQDN
+      FQDN: mcdrive.com
+    networks:
+      - collection-network
+    container_name: collection-webserver
+    depends_on:
+      - app
+  app:
+    image: collection_app:v0.1
+    container_name: collection-app
+    working_dir: /var/www/app
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./public:/var/www/app/public:rw,delegated
+      - ./storage:/var/www/app/storage:rw,delegated
+      - ./app:/var/www/app/app
+      - ./config:/var/www/app/config
+      - ./database:/var/www/app/database
+      - ./resources:/var/www/app/resources
+      - ./routes:/var/www/app/routes
+      - ./lang:/var/www/app/lang
+      - ./composer.json:/var/www/app/composer.json
+      - ./composer.lock:/var/www/app/composer.lock
+    networks:
+      - collection-network
+    depends_on:
+      - db
+  db:
+    image: mysql:5.7
+    ports:
+      - "3319:3306"
+    volumes:
+      - ./docker/local/volumes/mysql:/var/lib/mysql
+    command: --max_allowed_packet=16777216
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    container_name: collection_db
+    networks:
+      - collection-network
+networks:
+  collection-network:
+    driver: bridge
+
+volumes:
+  letsencrypt:
