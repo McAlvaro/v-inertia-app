@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import {Link, useForm} from "@inertiajs/vue3";
+import {Link, useForm, router} from "@inertiajs/vue3";
+import { ref, watch } from 'vue';
 
  defineProps({
     notes: Array
@@ -13,6 +14,13 @@ const destroy = ( id ) => {
 
     }
 }
+
+const q = ref('');
+
+watch( q, (value) => {
+    router.get(route('notes.index', { q: value }), {}, { preserveState: true });
+});
+
 </script>
 
 <template>
@@ -35,7 +43,12 @@ const destroy = ( id ) => {
                     </div>
                     <div class="md:col-span-2">
                         <div class="shadow bg-white md:rounded-md p-4">
-                            <Link class="bg-blue-500 text-white font-bold px-4 py-2 rounded-md" :href="route('notes.create')" >Crear Nota</Link>
+                            <div class="flex justify-between">
+
+                                <input type="text" class="form-input rounded-md shadow-md" placeholder="Buscar..." v-model="q">
+                                <Link class="bg-blue-500 text-white font-bold px-4 py-2 rounded-md" :href="route('notes.create')" >Crear Nota</Link>
+
+                            </div>
                             <table class="mt-5">
                                 <tr v-for="(note) in notes" :key="note.id">
                                     <td class="border px-4 py-2">
