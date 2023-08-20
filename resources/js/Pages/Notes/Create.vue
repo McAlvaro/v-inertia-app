@@ -34,8 +34,10 @@ const submit = () => {
                             <form @submit.prevent="submit" >
                                 <label class="block font-medium text-sm text-gray-700"> Resumen </label>
                                 <textarea class="form-input w-full rounded-md shadow-sm" v-model="form.excerpt"></textarea>
+                                <div class="text-red-500 text-sm" v-if="form.errors.excerpt">{{ form.errors.excerpt }}</div>
                                 <label class="block font-medium text-sm text-gray-700"> Contenido </label>
                                 <textarea class="form-input w-full rounded-md shadow-sm" v-model="form.content" rows="8" ></textarea>
+                                <div class="text-red-500 text-sm" v-if="form.errors.content">{{ form.errors.content }}</div>
                                 <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md ">Guardar</button>
                             </form>
                         </div>
