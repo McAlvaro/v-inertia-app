@@ -2,6 +2,11 @@ FROM php:8.1.1-fpm-alpine
 
 COPY --from=mlocati/php-extension-installer:1.1.41 /usr/bin/install-php-extensions /usr/local/bin/
 
+# Instalación de paquete linux-headers
+RUN apk add --no-cache linux-headers
+
+RUN apk add --no-cache autoconf g++ make
+
 RUN install-php-extensions \
     bcmath \
     exif \
@@ -14,6 +19,11 @@ RUN install-php-extensions \
     soap \
     @composer \
     && apk add --no-cache supervisor
+
+# RUN apk del autoconf g++ make
+
+RUN pecl install -o -f xdebug-3.2.2 \
+    && docker-php-ext-enable xdebug
 
 COPY ./docker/local/entrypoint.sh /usr/local/bin/docker-entrypoint
 

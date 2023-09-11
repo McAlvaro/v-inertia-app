@@ -14,8 +14,11 @@ class NoteController extends Controller
     public function index( Request $request )
     {
 
+
+        $notes = Note::latest()->where('excerpt', 'LIKE', "%$request->q%")->get();
+
         return Inertia::render('Notes/Index', [
-            'notes' => Note::latest()->where('excerpt', 'LIKE', "%$request->q%")->get()
+            'notes' => $notes
         ]);
     }
 

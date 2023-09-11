@@ -36,6 +36,8 @@ services:
       - ./lang:/var/www/app/lang
       - ./composer.json:/var/www/app/composer.json
       - ./composer.lock:/var/www/app/composer.lock
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     networks:
       - inertia-network
     depends_on:
